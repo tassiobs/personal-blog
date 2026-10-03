@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { PostCard } from '@/components/PostCard';
 import { getPublishedPosts, getPostLikes } from '@/lib/api';
 import { Post } from '@/types';

@@ -71,7 +71,7 @@ export async function signOut(): Promise<void> {
 
 // Posts - Public
 export async function getPublishedPosts(): Promise<Post[]> {
-  return request<Post[]>('/posts');
+  return request<Post[]>('/posts?source=blog');
 }
 
 export async function getPostBySlug(slug: string): Promise<Post> {
@@ -99,7 +99,7 @@ export async function createPost(data: {
 }): Promise<Post> {
   return request<Post>('/posts', {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: JSON.stringify({ ...data, source: 'blog' }),
   }, true);
 }
 
@@ -114,7 +114,7 @@ export async function updatePost(
 ): Promise<Post> {
   return request<Post>(`/posts/${id}`, {
     method: 'PUT',
-    body: JSON.stringify(data),
+    body: JSON.stringify({ ...data, source: 'blog' }),
   }, true);
 }
 
