@@ -26,9 +26,10 @@ export default async function HomePage({
   const activeCategoryId = searchParams.category ? Number(searchParams.category) : null;
   const activeCategory = categories.find((c) => c.id === activeCategoryId) ?? null;
 
-  const filteredPosts = activeCategoryId
+  const filteredPosts = (activeCategoryId
     ? posts.filter((p) => p.category_id === activeCategoryId)
-    : posts;
+    : posts
+  ).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   const likeCounts = await Promise.all(
     filteredPosts.map(async (post) => {
