@@ -96,7 +96,7 @@ export async function createPost(data: {
   title: string;
   body: string;
   slug?: string;
-  cover_image_url?: string;
+  cover_image_url?: string | null;
   category_id?: number | null;
   language?: PostLanguage | null;
 }): Promise<Post> {
@@ -112,7 +112,7 @@ export async function updatePost(
     title?: string;
     body?: string;
     slug?: string;
-    cover_image_url?: string;
+    cover_image_url?: string | null;
     category_id?: number | null;
     language?: PostLanguage | null;
   }

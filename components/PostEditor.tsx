@@ -17,7 +17,7 @@ interface PostEditorData {
   title: string;
   body: string;
   slug: string;
-  cover_image_url?: string;
+  cover_image_url?: string | null;
   category_id?: number | null;
   language?: PostLanguage | null;
 }
@@ -90,7 +90,7 @@ export function PostEditor({ initialData, onSave, saveLabel = 'Save Post', isSav
       title: title.trim(),
       body: body.trim(),
       slug: slug.trim(),
-      cover_image_url: coverImageUrl || undefined,
+      cover_image_url: coverImageUrl || null,
       category_id: categoryId,
       language,
     });
