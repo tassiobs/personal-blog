@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { generateSlug, validateSlug } from '@/lib/utils';
 import { uploadImage, getCategories } from '@/lib/api';
-import { Category } from '@/types';
+import { Category, PostLanguage } from '@/types';
 import { toast } from 'sonner';
 import { Upload, Eye, Edit3, Loader2 } from 'lucide-react';
 import Image from 'next/image';
@@ -19,6 +19,7 @@ interface PostEditorData {
   slug: string;
   cover_image_url?: string;
   category_id?: number | null;
+  language?: PostLanguage | null;
 }
 
 interface PostEditorProps {
@@ -34,6 +35,7 @@ export function PostEditor({ initialData, onSave, saveLabel = 'Save Post', isSav
   const [slug, setSlug] = useState(initialData?.slug || '');
   const [coverImageUrl, setCoverImageUrl] = useState(initialData?.cover_image_url || '');
   const [categoryId, setCategoryId] = useState<number | null>(initialData?.category_id ?? null);
+  const [language, setLanguage] = useState<PostLanguage | null>(initialData?.language ?? null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(!!initialData?.slug);
   const [activeTab, setActiveTab] = useState<'write' | 'preview'>('write');
@@ -90,6 +92,7 @@ export function PostEditor({ initialData, onSave, saveLabel = 'Save Post', isSav
       slug: slug.trim(),
       cover_image_url: coverImageUrl || undefined,
       category_id: categoryId,
+      language,
     });
   };
 
@@ -137,6 +140,21 @@ export function PostEditor({ initialData, onSave, saveLabel = 'Save Post', isSav
           {categories.map((c) => (
             <option key={c.id} value={c.id}>{c.name}</option>
           ))}
+        </select>
+      </div>
+
+      {/* Language */}
+      <div className="space-y-1.5">
+        <Label htmlFor="language">Language</Label>
+        <select
+          id="language"
+          value={language ?? ''}
+          onChange={(e) => setLanguage((e.target.value as PostLanguage) || null)}
+          className="w-full h-9 rounded-md border border-slate-200 bg-white px-3 py-1 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+        >
+          <option value="">Not specified</option>
+          <option value="en">English (EN)</option>
+          <option value="pt-BR">Portuguese — PT-BR</option>
         </select>
       </div>
 

@@ -1,4 +1,4 @@
-import { Post, User, AuthResponse, LikesResponse, Category } from '@/types';
+import { Post, User, AuthResponse, LikesResponse, Category, PostLanguage } from '@/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://vocabranch-blog-production.up.railway.app';
 
@@ -98,6 +98,7 @@ export async function createPost(data: {
   slug?: string;
   cover_image_url?: string;
   category_id?: number | null;
+  language?: PostLanguage | null;
 }): Promise<Post> {
   return request<Post>('/posts', {
     method: 'POST',
@@ -113,6 +114,7 @@ export async function updatePost(
     slug?: string;
     cover_image_url?: string;
     category_id?: number | null;
+    language?: PostLanguage | null;
   }
 ): Promise<Post> {
   return request<Post>(`/posts/${id}`, {

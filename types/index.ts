@@ -1,4 +1,5 @@
 export type PostSource = 'vocabranch' | 'blog';
+export type PostLanguage = 'en' | 'pt-BR';
 
 export interface Category {
   id: number;
@@ -13,6 +14,7 @@ export interface Post {
   cover_image_url?: string;
   status: 'draft' | 'published';
   source: PostSource | null;
+  language: PostLanguage | null;
   category_id: number | null;
   category: Category | null;
   author_id: string;

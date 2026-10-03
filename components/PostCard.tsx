@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Post } from '@/types';
-import { formatDate, detectLanguage } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
 import { LanguageBadge } from './LanguageBadge';
 import { Heart } from 'lucide-react';
 
@@ -11,7 +11,6 @@ interface PostCardProps {
 }
 
 export function PostCard({ post, likeCount = 0 }: PostCardProps) {
-  const language = detectLanguage(post.title, post.body);
 
   return (
     <Link href={`/posts/${post.slug}`} className="group block">
@@ -34,7 +33,7 @@ export function PostCard({ post, likeCount = 0 }: PostCardProps) {
         {/* Content */}
         <div className="flex flex-col flex-1 p-5">
           <div className="flex items-center gap-2 mb-3 flex-wrap">
-            <LanguageBadge language={language} />
+            <LanguageBadge language={post.language} />
             {post.category && (
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
                 {post.category.name}
