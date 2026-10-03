@@ -58,8 +58,13 @@ export default async function PostPage({ params }: PostPageProps) {
 
       {/* Header */}
       <header className="mb-10">
-        <div className="flex items-center gap-3 mb-4 text-sm text-slate-400">
+        <div className="flex items-center gap-3 mb-4 text-sm text-slate-400 flex-wrap">
           <LanguageBadge language={language} />
+          {post.category && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
+              {post.category.name}
+            </span>
+          )}
           <span>{formatDate(post.created_at)}</span>
           <span>{readingTime} min read</span>
         </div>

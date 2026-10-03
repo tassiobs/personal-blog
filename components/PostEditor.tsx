@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { generateSlug, validateSlug } from '@/lib/utils';
-import { uploadImage } from '@/lib/api';
+import { uploadImage, getCategories } from '@/lib/api';
+import { Category } from '@/types';
 import { toast } from 'sonner';
 import { Upload, Eye, Edit3, Loader2 } from 'lucide-react';
 import Image from 'next/image';
@@ -17,6 +18,7 @@ interface PostEditorData {
   body: string;
   slug: string;
   cover_image_url?: string;
+  category_id?: number | null;
 }
 
 interface PostEditorProps {
@@ -31,12 +33,17 @@ export function PostEditor({ initialData, onSave, saveLabel = 'Save Post', isSav
   const [body, setBody] = useState(initialData?.body || '');
   const [slug, setSlug] = useState(initialData?.slug || '');
   const [coverImageUrl, setCoverImageUrl] = useState(initialData?.cover_image_url || '');
+  const [categoryId, setCategoryId] = useState<number | null>(initialData?.category_id ?? null);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(!!initialData?.slug);
   const [activeTab, setActiveTab] = useState<'write' | 'preview'>('write');
   const [isUploading, setIsUploading] = useState(false);
   const [slugError, setSlugError] = useState('');
 
-  // Auto-generate slug from title
+  useEffect(() => {
+    getCategories().then(setCategories).catch(() => {});
+  }, []);
+
   useEffect(() => {
     if (!slugManuallyEdited && title) {
       setSlug(generateSlug(title));
@@ -72,28 +79,17 @@ export function PostEditor({ initialData, onSave, saveLabel = 'Save Post', isSav
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title.trim()) {
-      toast.error('Title is required');
-      return;
-    }
-    if (!body.trim()) {
-      toast.error('Body is required');
-      return;
-    }
-    if (!slug.trim()) {
-      toast.error('Slug is required');
-      return;
-    }
-    if (!validateSlug(slug)) {
-      toast.error('Invalid slug format');
-      return;
-    }
+    if (!title.trim()) { toast.error('Title is required'); return; }
+    if (!body.trim()) { toast.error('Body is required'); return; }
+    if (!slug.trim()) { toast.error('Slug is required'); return; }
+    if (!validateSlug(slug)) { toast.error('Invalid slug format'); return; }
 
     await onSave({
       title: title.trim(),
       body: body.trim(),
       slug: slug.trim(),
       cover_image_url: coverImageUrl || undefined,
+      category_id: categoryId,
     });
   };
 
@@ -128,6 +124,22 @@ export function PostEditor({ initialData, onSave, saveLabel = 'Save Post', isSav
         )}
       </div>
 
+      {/* Category */}
+      <div className="space-y-1.5">
+        <Label htmlFor="category">Category</Label>
+        <select
+          id="category"
+          value={categoryId ?? ''}
+          onChange={(e) => setCategoryId(e.target.value ? Number(e.target.value) : null)}
+          className="w-full h-9 rounded-md border border-slate-200 bg-white px-3 py-1 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+        >
+          <option value="">No category</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>{c.name}</option>
+          ))}
+        </select>
+      </div>
+
       {/* Cover Image */}
       <div className="space-y-1.5">
         <Label>Cover Image</Label>
@@ -141,22 +153,12 @@ export function PostEditor({ initialData, onSave, saveLabel = 'Save Post', isSav
               disabled={isUploading}
             />
             <span className="inline-flex items-center gap-2 px-4 py-2 text-sm border border-slate-200 rounded-md bg-white hover:bg-slate-50 transition-colors cursor-pointer">
-              {isUploading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Upload className="w-4 h-4" />
-              )}
+              {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
               {isUploading ? 'Uploading...' : 'Upload Image'}
             </span>
           </label>
           {coverImageUrl && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => setCoverImageUrl('')}
-              className="text-red-500 hover:text-red-600 hover:bg-red-50"
-            >
+            <Button type="button" variant="ghost" size="sm" onClick={() => setCoverImageUrl('')} className="text-red-500 hover:text-red-600 hover:bg-red-50">
               Remove
             </Button>
           )}
@@ -188,26 +190,16 @@ export function PostEditor({ initialData, onSave, saveLabel = 'Save Post', isSav
             <button
               type="button"
               onClick={() => setActiveTab('write')}
-              className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded transition-colors ${
-                activeTab === 'write'
-                  ? 'bg-slate-900 text-white'
-                  : 'text-slate-500 hover:text-slate-900'
-              }`}
+              className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded transition-colors ${activeTab === 'write' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-900'}`}
             >
-              <Edit3 className="w-3 h-3" />
-              Write
+              <Edit3 className="w-3 h-3" /> Write
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('preview')}
-              className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded transition-colors ${
-                activeTab === 'preview'
-                  ? 'bg-slate-900 text-white'
-                  : 'text-slate-500 hover:text-slate-900'
-              }`}
+              className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded transition-colors ${activeTab === 'preview' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-900'}`}
             >
-              <Eye className="w-3 h-3" />
-              Preview
+              <Eye className="w-3 h-3" /> Preview
             </button>
           </div>
         </div>
@@ -221,11 +213,7 @@ export function PostEditor({ initialData, onSave, saveLabel = 'Save Post', isSav
           />
         ) : (
           <div className="min-h-[500px] w-full rounded-md border border-slate-200 bg-white p-4 overflow-auto">
-            {body ? (
-              <MarkdownRenderer content={body} />
-            ) : (
-              <p className="text-slate-400 text-sm italic">Nothing to preview yet.</p>
-            )}
+            {body ? <MarkdownRenderer content={body} /> : <p className="text-slate-400 text-sm italic">Nothing to preview yet.</p>}
           </div>
         )}
       </div>
@@ -233,14 +221,7 @@ export function PostEditor({ initialData, onSave, saveLabel = 'Save Post', isSav
       {/* Submit */}
       <div className="flex justify-end pt-2">
         <Button type="submit" disabled={isSaving || isUploading}>
-          {isSaving ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            saveLabel
-          )}
+          {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : saveLabel}
         </Button>
       </div>
     </form>

@@ -1,5 +1,10 @@
 export type PostSource = 'vocabranch' | 'blog';
 
+export interface Category {
+  id: number;
+  name: string;
+}
+
 export interface Post {
   id: string;
   title: string;
@@ -8,6 +13,8 @@ export interface Post {
   cover_image_url?: string;
   status: 'draft' | 'published';
   source: PostSource | null;
+  category_id: number | null;
+  category: Category | null;
   author_id: string;
   created_at: string;
   updated_at: string;

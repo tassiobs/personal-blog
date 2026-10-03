@@ -1,4 +1,4 @@
-import { Post, User, AuthResponse, LikesResponse } from '@/types';
+import { Post, User, AuthResponse, LikesResponse, Category } from '@/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://vocabranch-blog-production.up.railway.app';
 
@@ -38,6 +38,7 @@ async function request<T>(
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
     headers,
+    cache: 'no-store',
   });
 
   if (!res.ok) {
@@ -96,6 +97,7 @@ export async function createPost(data: {
   body: string;
   slug?: string;
   cover_image_url?: string;
+  category_id?: number | null;
 }): Promise<Post> {
   return request<Post>('/posts', {
     method: 'POST',
@@ -110,6 +112,7 @@ export async function updatePost(
     body?: string;
     slug?: string;
     cover_image_url?: string;
+    category_id?: number | null;
   }
 ): Promise<Post> {
   return request<Post>(`/posts/${id}`, {
@@ -143,6 +146,29 @@ export async function updateUserProfile(
     method: 'PUT',
     body: JSON.stringify(data),
   }, true);
+}
+
+// Categories
+export async function getCategories(): Promise<Category[]> {
+  return request<Category[]>('/categories');
+}
+
+export async function createCategory(name: string): Promise<Category> {
+  return request<Category>('/categories', {
+    method: 'POST',
+    body: JSON.stringify({ name }),
+  }, true);
+}
+
+export async function updateCategory(id: number, name: string): Promise<Category> {
+  return request<Category>(`/categories/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({ name }),
+  }, true);
+}
+
+export async function deleteCategory(id: number): Promise<void> {
+  return request<void>(`/categories/${id}`, { method: 'DELETE' }, true);
 }
 
 // Uploads

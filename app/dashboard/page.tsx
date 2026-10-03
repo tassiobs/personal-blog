@@ -28,8 +28,8 @@ export default function DashboardPage() {
   const fetchPosts = async () => {
     try {
       const data = await getAllPosts();
-      // Sort by created_at desc
-      setPosts(data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
+      const filtered = data.filter((p) => p.source === 'blog');
+      setPosts(filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to load posts');
     } finally {
@@ -83,12 +83,17 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
           <p className="text-sm text-slate-500 mt-1">{posts.length} post{posts.length !== 1 ? 's' : ''} total</p>
         </div>
-        <Link href="/dashboard/posts/new">
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            New Post
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/dashboard/categories">
+            <Button variant="outline" size="sm">Categories</Button>
+          </Link>
+          <Link href="/dashboard/posts/new">
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              New Post
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Posts List */}
@@ -119,7 +124,10 @@ export default function DashboardPage() {
               {/* Title & date */}
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-slate-900 truncate text-sm">{post.title}</p>
-                <p className="text-xs text-slate-400 mt-0.5">{formatDate(post.created_at)}</p>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  {formatDate(post.created_at)}
+                  {post.category && <span className="ml-2 text-slate-500">· {post.category.name}</span>}
+                </p>
               </div>
 
               {/* Actions */}
