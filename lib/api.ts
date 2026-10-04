@@ -127,6 +127,10 @@ export async function publishPost(id: string): Promise<Post> {
   return request<Post>(`/posts/${id}/publish`, { method: 'POST' }, true);
 }
 
+export async function unpublishPost(id: string): Promise<Post> {
+  return request<Post>(`/posts/${id}/unpublish`, { method: 'POST' }, true);
+}
+
 export async function deletePost(id: string): Promise<void> {
   return request<void>(`/posts/${id}`, { method: 'DELETE' }, true);
 }

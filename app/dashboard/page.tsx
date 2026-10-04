@@ -3,13 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getAuthToken, getAllPosts, deletePost, publishPost } from '@/lib/api';
+import { getAuthToken, getAllPosts, deletePost, publishPost, unpublishPost } from '@/lib/api';
 import { Post } from '@/types';
 import { formatDate } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Plus, Edit2, Trash2, Send, Loader2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Send, EyeOff, Loader2 } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -48,6 +48,22 @@ export default function DashboardPage() {
       toast.success(`"${post.title}" published`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to publish');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleUnpublish = async (post: Post) => {
+    if (post.status === 'draft') return;
+    setActionLoading(`unpublish-${post.id}`);
+    try {
+      await unpublishPost(post.id);
+      setPosts((prev) =>
+        prev.map((p) => (p.id === post.id ? { ...p, status: 'draft' } : p))
+      );
+      toast.success(`"${post.title}" moved to draft`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to unpublish');
     } finally {
       setActionLoading(null);
     }
@@ -139,7 +155,7 @@ export default function DashboardPage() {
                   </Button>
                 </Link>
 
-                {post.status === 'draft' && (
+                {post.status === 'draft' ? (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -147,12 +163,19 @@ export default function DashboardPage() {
                     onClick={() => handlePublish(post)}
                     disabled={actionLoading === `publish-${post.id}`}
                   >
-                    {actionLoading === `publish-${post.id}` ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Send className="w-4 h-4" />
-                    )}
+                    {actionLoading === `publish-${post.id}` ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                     <span className="sr-only">Publish</span>
+                  </Button>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                    onClick={() => handleUnpublish(post)}
+                    disabled={actionLoading === `unpublish-${post.id}`}
+                  >
+                    {actionLoading === `unpublish-${post.id}` ? <Loader2 className="w-4 h-4 animate-spin" /> : <EyeOff className="w-4 h-4" />}
+                    <span className="sr-only">Unpublish</span>
                   </Button>
                 )}
 
