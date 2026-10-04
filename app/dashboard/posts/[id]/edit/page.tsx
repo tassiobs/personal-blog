@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAuthToken, getPostById, updatePost } from '@/lib/api';
 import { Post } from '@/types';
-import { PostEditor } from '@/components/PostEditor';
+import { PostEditor, PostEditorData } from '@/components/PostEditor';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader2 } from 'lucide-react';
@@ -40,12 +40,7 @@ export default function EditPostPage({ params }: EditPostPageProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
-  const handleSave = async (data: {
-    title: string;
-    body: string;
-    slug: string;
-    cover_image_url?: string;
-  }) => {
+  const handleSave = async (data: PostEditorData) => {
     setIsSaving(true);
     try {
       await updatePost(params.id, data);
@@ -90,6 +85,8 @@ export default function EditPostPage({ params }: EditPostPageProps) {
           body: post.body,
           slug: post.slug,
           cover_image_url: post.cover_image_url,
+          category_id: post.category_id,
+          language: post.language,
         }}
         onSave={handleSave}
         isSaving={isSaving}

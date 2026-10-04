@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAuthToken, createPost } from '@/lib/api';
-import { PostEditor } from '@/components/PostEditor';
+import { PostEditor, PostEditorData } from '@/components/PostEditor';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -19,12 +19,7 @@ export default function NewPostPage() {
     }
   }, [router]);
 
-  const handleSave = async (data: {
-    title: string;
-    body: string;
-    slug: string;
-    cover_image_url?: string;
-  }) => {
+  const handleSave = async (data: PostEditorData) => {
     setIsSaving(true);
     try {
       await createPost(data);

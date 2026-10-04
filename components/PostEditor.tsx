@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import { Upload, Eye, Edit3, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 
-interface PostEditorData {
+export interface PostEditorData {
   title: string;
   body: string;
   slug: string;
