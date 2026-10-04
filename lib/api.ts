@@ -1,4 +1,4 @@
-import { Post, User, AuthResponse, LikesResponse, Category, PostLanguage } from '@/types';
+import { Post, User, AuthResponse, LikesResponse, Category, PostLanguage, Comment } from '@/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://vocabranch-blog-production.up.railway.app';
 
@@ -152,6 +152,18 @@ export async function updateUserProfile(
     method: 'PUT',
     body: JSON.stringify(data),
   }, true);
+}
+
+// Comments
+export async function getComments(postId: string): Promise<Comment[]> {
+  return request<Comment[]>(`/posts/${postId}/comments`);
+}
+
+export async function createComment(postId: string, data: { name: string; body: string }): Promise<Comment> {
+  return request<Comment>(`/posts/${postId}/comments`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
 }
 
 // Categories

@@ -44,3 +44,11 @@ export interface LikesResponse {
   post_id: string;
   likes: number;
 }
+
+export interface Comment {
+  id: number;
+  post_id: number;
+  name: string;
+  body: string;
+  created_at: string;
+}

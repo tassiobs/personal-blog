@@ -1,10 +1,11 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import { getPostBySlug, getPostLikes } from '@/lib/api';
+import { getPostBySlug, getPostLikes, getComments } from '@/lib/api';
 import { formatDate, estimateReadingTime } from '@/lib/utils';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { LanguageBadge } from '@/components/LanguageBadge';
 import { LikeButton } from './LikeButton';
+import { Comments } from './Comments';
 
 interface PostPageProps {
   params: { slug: string };
@@ -32,10 +33,11 @@ export default async function PostPage({ params }: PostPageProps) {
     notFound();
   }
 
-  try {
-    const likesData = await getPostLikes(post.id);
-    likes = likesData.likes;
-  } catch {}
+  const [likesData, comments] = await Promise.all([
+    getPostLikes(post.id).catch(() => ({ likes: 0 })),
+    getComments(post.id).catch(() => []),
+  ]);
+  likes = likesData.likes;
 
   const readingTime = estimateReadingTime(post.body);
 
@@ -95,6 +97,9 @@ export default async function PostPage({ params }: PostPageProps) {
         </p>
         <LikeButton postId={post.id} initialCount={likes} />
       </footer>
+
+      {/* Comments */}
+      <Comments postId={post.id} initialComments={comments} />
     </div>
   );
 }
