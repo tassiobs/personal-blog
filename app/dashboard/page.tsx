@@ -9,7 +9,7 @@ import { formatDate } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Plus, Edit2, Trash2, Send, EyeOff, Loader2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Send, EyeOff, MessageSquare, Loader2 } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -148,6 +148,12 @@ export default function DashboardPage() {
 
               {/* Actions */}
               <div className="flex items-center gap-1 shrink-0">
+                <Link href={`/dashboard/posts/${post.id}/comments`}>
+                  <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-900">
+                    <MessageSquare className="w-4 h-4" />
+                    <span className="sr-only">Comments</span>
+                  </Button>
+                </Link>
                 <Link href={`/dashboard/posts/${post.id}/edit`}>
                   <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-900">
                     <Edit2 className="w-4 h-4" />
