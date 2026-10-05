@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { getAuthToken, setAuthToken } from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -32,8 +33,9 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-100 bg-white/90 backdrop-blur-sm">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-        <Link href="/" className="font-semibold text-slate-900 hover:text-blue-600 transition-colors text-sm tracking-tight">
-          Tassio Batista
+        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <Image src="/logo.png" alt="Tassio Batista" width={28} height={28} className="rounded-md" />
+          <span className="font-semibold text-slate-900 text-sm tracking-tight">Tassio Batista</span>
         </Link>
 
         <nav className="flex items-center gap-1">
