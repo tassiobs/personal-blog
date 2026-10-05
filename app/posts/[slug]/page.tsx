@@ -14,9 +14,25 @@ interface PostPageProps {
 export async function generateMetadata({ params }: PostPageProps) {
   try {
     const post = await getPostBySlug(params.slug);
+    const description = post.body.slice(0, 160).replace(/[#*`]/g, '');
+    const url = `https://www.tassiobatista.com/posts/${post.slug}`;
+
     return {
       title: `${post.title} — Tassio Batista`,
-      description: post.body.slice(0, 160).replace(/[#*`]/g, ''),
+      description,
+      openGraph: {
+        title: post.title,
+        description,
+        url,
+        type: 'article',
+        ...(post.cover_image_url && { images: [{ url: post.cover_image_url, width: 1200, height: 630 }] }),
+      },
+      twitter: {
+        card: post.cover_image_url ? 'summary_large_image' : 'summary',
+        title: post.title,
+        description,
+        ...(post.cover_image_url && { images: [post.cover_image_url] }),
+      },
     };
   } catch {
     return { title: 'Post Not Found — Tassio Batista' };
