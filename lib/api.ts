@@ -71,8 +71,10 @@ export async function signOut(): Promise<void> {
 }
 
 // Posts - Public
-export async function getPublishedPosts(): Promise<Post[]> {
-  return request<Post[]>('/posts?source=blog');
+export async function getPublishedPosts(language?: PostLanguage): Promise<Post[]> {
+  const params = new URLSearchParams({ source: 'blog' });
+  if (language) params.set('language', language);
+  return request<Post[]>(`/posts?${params.toString()}`);
 }
 
 export async function getPostBySlug(slug: string): Promise<Post> {

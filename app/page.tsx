@@ -3,28 +3,25 @@ export const dynamic = 'force-dynamic';
 import Link from 'next/link';
 import { PostCard } from '@/components/PostCard';
 import { getPublishedPosts, getPostLikes, getCategories } from '@/lib/api';
-import { Post, Category } from '@/types';
+import { Post, Category, PostLanguage } from '@/types';
 
-async function getPosts(): Promise<Post[]> {
-  try {
-    return await getPublishedPosts();
-  } catch {
-    return [];
-  }
-}
+const LANGUAGES: { value: PostLanguage; label: string }[] = [
+  { value: 'en', label: 'EN' },
+  { value: 'pt-BR', label: 'PT' },
+];
 
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: { category?: string };
+  searchParams: { category?: string; language?: string };
 }) {
+  const activeLanguage = (searchParams.language as PostLanguage) || null;
+  const activeCategoryId = searchParams.category ? Number(searchParams.category) : null;
+
   const [posts, categories] = await Promise.all([
-    getPosts(),
+    getPublishedPosts(activeLanguage ?? undefined).catch(() => [] as Post[]),
     getCategories().catch(() => [] as Category[]),
   ]);
-
-  const activeCategoryId = searchParams.category ? Number(searchParams.category) : null;
-  const activeCategory = categories.find((c) => c.id === activeCategoryId) ?? null;
 
   const filteredPosts = (activeCategoryId
     ? posts.filter((p) => p.category_id === activeCategoryId)
@@ -42,6 +39,16 @@ export default async function HomePage({
     })
   );
 
+  const buildHref = (params: { category?: number | null; language?: PostLanguage | null }) => {
+    const p = new URLSearchParams();
+    const cat = 'category' in params ? params.category : activeCategoryId;
+    const lang = 'language' in params ? params.language : activeLanguage;
+    if (cat) p.set('category', String(cat));
+    if (lang) p.set('language', lang);
+    const str = p.toString();
+    return str ? `/?${str}` : '/';
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-16">
       {/* Hero */}
@@ -56,42 +63,64 @@ export default async function HomePage({
 
       <hr className="border-slate-100 mb-10" />
 
-      {/* Category filter */}
-      {categories.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-8">
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-4 mb-8">
+        {/* Category filter */}
+        {categories.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href={buildHref({ category: null })}
+              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                !activeCategoryId ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              All
+            </Link>
+            {categories.map((cat) => (
+              <Link
+                key={cat.id}
+                href={buildHref({ category: cat.id })}
+                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                  activeCategoryId === cat.id ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                {cat.name}
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* Divider */}
+        {categories.length > 0 && <span className="text-slate-200 text-sm">|</span>}
+
+        {/* Language filter */}
+        <div className="flex gap-2">
           <Link
-            href="/"
+            href={buildHref({ language: null })}
             className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-              !activeCategoryId
-                ? 'bg-slate-900 text-white'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              !activeLanguage ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            All
+            All languages
           </Link>
-          {categories.map((cat) => (
+          {LANGUAGES.map((lang) => (
             <Link
-              key={cat.id}
-              href={`/?category=${cat.id}`}
+              key={lang.value}
+              href={buildHref({ language: lang.value })}
               className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                activeCategoryId === cat.id
-                  ? 'bg-slate-900 text-white'
+                activeLanguage === lang.value
+                  ? lang.value === 'pt-BR' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              {cat.name}
+              {lang.label}
             </Link>
           ))}
         </div>
-      )}
+      </div>
 
       {/* Posts */}
       <section>
-        {activeCategory && (
-          <p className="text-sm text-slate-400 mb-6">
-            Showing {filteredPosts.length} post{filteredPosts.length !== 1 ? 's' : ''} in <span className="font-medium text-slate-600">{activeCategory.name}</span>
-          </p>
-        )}
         {filteredPosts.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-slate-400 text-base">No posts yet. Check back soon.</p>
