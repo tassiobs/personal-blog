@@ -166,6 +166,10 @@ export async function createComment(postId: string, data: { name: string; body: 
   });
 }
 
+export async function deleteComment(postId: string, commentId: number): Promise<void> {
+  return request<void>(`/posts/${postId}/comments/${commentId}`, { method: 'DELETE' }, true);
+}
+
 // Categories
 export async function getCategories(): Promise<Category[]> {
   return request<Category[]>('/categories');

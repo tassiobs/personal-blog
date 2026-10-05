@@ -1,15 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Comment } from '@/types';
-import { createComment } from '@/lib/api';
+import { createComment, deleteComment, getAuthToken } from '@/lib/api';
 import { formatDate } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Trash2 } from 'lucide-react';
 
 interface CommentsProps {
   postId: string;
@@ -21,6 +21,12 @@ export function Comments({ postId, initialComments }: CommentsProps) {
   const [name, setName] = useState('');
   const [body, setBody] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    setIsAuthenticated(!!getAuthToken());
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +46,19 @@ export function Comments({ postId, initialComments }: CommentsProps) {
     }
   };
 
+  const handleDelete = async (commentId: number) => {
+    setDeletingId(commentId);
+    try {
+      await deleteComment(postId, commentId);
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
+      toast.success('Comment deleted');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to delete comment');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <section className="mt-16 pt-10 border-t border-slate-100">
       <h2 className="text-lg font-semibold text-slate-900 mb-8">
@@ -52,14 +71,30 @@ export function Comments({ postId, initialComments }: CommentsProps) {
       ) : (
         <ul className="space-y-8 mb-12">
           {comments.map((comment) => (
-            <li key={comment.id} className="flex gap-4">
+            <li key={comment.id} className="flex gap-4 group">
               <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0 text-sm font-medium text-slate-500">
                 {comment.name[0].toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-baseline gap-2 mb-1">
-                  <span className="text-sm font-medium text-slate-900">{comment.name}</span>
-                  <span className="text-xs text-slate-400">{formatDate(comment.created_at)}</span>
+                <div className="flex items-baseline justify-between gap-2 mb-1">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-sm font-medium text-slate-900">{comment.name}</span>
+                    <span className="text-xs text-slate-400">{formatDate(comment.created_at)}</span>
+                  </div>
+                  {isAuthenticated && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-600 hover:bg-red-50 h-6 w-6 p-0"
+                      onClick={() => handleDelete(comment.id)}
+                      disabled={deletingId === comment.id}
+                    >
+                      {deletingId === comment.id
+                        ? <Loader2 className="w-3 h-3 animate-spin" />
+                        : <Trash2 className="w-3 h-3" />}
+                      <span className="sr-only">Delete comment</span>
+                    </Button>
+                  )}
                 </div>
                 <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{comment.body}</p>
               </div>
