@@ -13,7 +13,7 @@ export default function AboutPage() {
 
       <div className="prose prose-slate max-w-none space-y-5 text-slate-600 leading-relaxed">
         <p>
-          I&apos;m Tassio Batista &mdash; a writer, product manager, and software thinker based in Brazil.
+          I&apos;m Tassio Batista &mdash; a product manager and software thinker based in Brazil.
         </p>
         <p>
           I write about AI, product management, and software &mdash; mostly as a way to think out loud.
