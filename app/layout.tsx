@@ -28,6 +28,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
+      <head>
+        <script defer src="https://cloud.umami.is/script.js" data-website-id="14380690-e7a0-4aad-be11-ace2a2c214f2" />
+      </head>
       <body className="font-sans min-h-screen bg-white text-slate-900 antialiased">
         <Navbar />
         <main>{children}</main>
